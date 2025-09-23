@@ -1,0 +1,20 @@
+langchain-core
+langchain
+
+langchain-openai
+openai
+
+pydantic
+
+graphdalf
+python-dotenv
+
+numpy
+scikit-learn
+pandas
+
+
+#backup LLM 
+langchain-huggingface
+huggingface-hub
+transformers
