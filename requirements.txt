@@ -18,3 +18,8 @@ pandas
 langchain-huggingface
 huggingface-hub
 transformers
+
+#connection
+flask
+flask-cors
+pymongo

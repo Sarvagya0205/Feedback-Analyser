@@ -49,3 +49,12 @@ while True:
     paired_feedback.append(entry)
     result = chain.invoke({'text': user_input})
     print(result)
+
+#for flask exposing this fucntion
+def analyze_feedback(text):
+    classfication = classifier_chain.invoke({'text':text})
+    result = chain.invoke({'text':text})
+    return{
+        'feedback':text,
+        'sentiment':classfication.sentiment
+    }
