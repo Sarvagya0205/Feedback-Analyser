@@ -6,7 +6,7 @@ openai
 
 pydantic
 
-graphdalf
+grandalf
 python-dotenv
 
 numpy

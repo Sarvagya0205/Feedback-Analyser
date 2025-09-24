@@ -1,31 +1,51 @@
-from langchain_openai import ChatOpenAI , OpenAI , OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
-from langchain import output_parsers
-from langchain_core.output_parsers import StrOutputParser , PydanticOutputParser
+from langchain_core.output_parsers import StrOutputParser, PydanticOutputParser
+from langchain_core.runnables import RunnableBranch, RunnableLambda
+from pydantic import BaseModel, Field
 from typing import Literal
-from pydantic import BaseModel , Field
-from dotenv import load_dotenv 
-
+from dotenv import load_dotenv
 load_dotenv()
 
+model = ChatOpenAI(model="gpt-5")
+parser = StrOutputParser()
 
-model = ChatOpenAI()
+class Feedback(BaseModel):
+    sentiment: Literal['positive', 'negative', 'neutral'] = Field(description="give the sentiment of the feedback")
 
-str_parser = StrOutputParser()
-user_input = "hello"
-while user_input != "exit":
-    user_input=input("please state your feedback : ")
+parser2 = PydanticOutputParser(pydantic_object=Feedback)
 
-    class Feedback(BaseModel):
-        sentiment:Literal['positive','negitive','neutral'] = Field(description="give the sentiment of the feedback")
+prompt1 = PromptTemplate(
+    template='classify the following feedback into positive , negative , neutral {text} \n {format_instruction}',
+    input_variables=["text"],
+    partial_variables={'format_instruction': parser2.get_format_instructions()}
+)
 
-    prompt1 = PromptTemplate(
-        template="{feedbacks}",
-        input_variables={'feedback'}
-    )
+classifier_chain = prompt1 | model | parser2
+prompt2 = PromptTemplate(
+    template="Write an appropriate response for this positive feedback \n {text}",
+    input_variables=["text"]
+)
+prompt3 = PromptTemplate(
+    template="Write an appropriate response for this negative feedback \n {text}",
+    input_variables=["text"]
+)
 
-    chain = analysis_chain = prompt1 | model | str_parser
+branch_chain = RunnableBranch(
+    (lambda x: x.sentiment == 'positive', prompt2 | model | parser),
+    (lambda x: x.sentiment == 'negative', prompt3 | model | parser),
+    RunnableLambda(lambda x: "could not find sentiment")
+)
+chain = classifier_chain | branch_chain
 
-    result = chain.invoke({'feedbacks':'i hope we never work again'})
-
+#  User Input Loop 
+paired_feedback = []
+while True:
+    user_input = input("Enter your feedback (or type 'exit' to stop): ")
+    if user_input.lower() == 'exit':
+        break
+    classfication = classifier_chain.invoke({'text':user_input})
+    entry = {"feedback":user_input , "sentiment":classfication.sentiment}
+    paired_feedback.append(entry)
+    result = chain.invoke({'text': user_input})
     print(result)
