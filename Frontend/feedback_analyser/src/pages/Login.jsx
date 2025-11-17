@@ -32,7 +32,7 @@ export default function Login() {
     setLoading(true)
 
     const clientId = GOOGLE_CLIENT_ID
-    
+    console.log('clientId used:', import.meta.env.VITE_GOOGLE_CLIENT_ID);
     if (!clientId) {
       setError('Google OAuth is not configured. Please use email/password login.')
       setLoading(false)
