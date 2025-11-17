@@ -7,7 +7,7 @@ from typing import Literal
 from dotenv import load_dotenv
 load_dotenv()
 
-model = ChatOpenAI(model="gpt-5")
+model = ChatOpenAI(model="gpt-5-mini",temperature=1)
 parser = StrOutputParser()
 
 class Feedback(BaseModel):
@@ -38,23 +38,23 @@ branch_chain = RunnableBranch(
 )
 chain = classifier_chain | branch_chain
 
-#  User Input Loop 
-paired_feedback = []
-while True:
-    user_input = input("Enter your feedback (or type 'exit' to stop): ")
-    if user_input.lower() == 'exit':
-        break
-    classfication = classifier_chain.invoke({'text':user_input})
-    entry = {"feedback":user_input , "sentiment":classfication.sentiment}
-    paired_feedback.append(entry)
-    result = chain.invoke({'text': user_input})
-    print(result)
 
-#for flask exposing this fucntion
-def analyze_feedback(text):
-    classfication = classifier_chain.invoke({'text':text})
-    result = chain.invoke({'text':text})
-    return{
-        'feedback':text,
-        'sentiment':classfication.sentiment
+def analyze_feedback(text: str):
+    """Classify feedback text and optionally return model response."""
+    classification = classifier_chain.invoke({'text': text})
+    # Currently we only need sentiment for API response; feel free to return `result`
+    _ = chain.invoke({'text': text})
+    return {
+        'feedback': text,
+        'sentiment': classification.sentiment
     }
+
+
+# if __name__ == "__main__":
+#     # Simple CLI loop for manual testing
+#     while True:
+#         user_input = input("Enter your feedback (or type 'exit' to stop): ")
+#         if user_input.lower() == "exit":
+#             break
+#         result = analyze_feedback(user_input)
+#         print(result)
