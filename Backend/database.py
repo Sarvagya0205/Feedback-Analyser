@@ -71,6 +71,16 @@ def init_db():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """)
             
+            # Create default user if it doesn't exist
+            cursor.execute("SELECT COUNT(*) as count FROM users WHERE id = 1")
+            result = cursor.fetchone()
+            if result['count'] == 0:
+                cursor.execute("""
+                    INSERT INTO users (id, email, name, provider)
+                    VALUES (1, 'default@feedback.local', 'Default User', 'local')
+                """)
+                print("✅ Default user created")
+            
             connection.commit()
             print("Database initialized successfully")
     except Exception as e:
