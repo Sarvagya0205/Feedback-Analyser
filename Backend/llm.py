@@ -56,5 +56,5 @@ def analyze_feedback(text: str):
 #         user_input = input("Enter your feedback (or type 'exit' to stop): ")
 #         if user_input.lower() == "exit":
 #             break
-#         result = analyze_feedback(user_input)
+#         result = chain(user_input)
 #         print(result)
