@@ -1,3 +1,6 @@
+# Apply pydantic compatibility patch BEFORE any other imports
+import pydantic_compat
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os

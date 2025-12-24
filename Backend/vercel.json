@@ -16,6 +16,8 @@
     }
   ],
   "env": {
-    "FLASK_ENV": "production"
+    "FLASK_ENV": "production",
+    "LANGSMITH_API_KEY": "",
+    "PYTHONPATH": "/var/task"
   }
 }
