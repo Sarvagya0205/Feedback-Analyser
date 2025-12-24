@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
-from llm import analyze_feedback
 from database import init_db, get_db_connection
 
 app = Flask(__name__)
@@ -27,6 +26,16 @@ def create_tables():
     except Exception as e:
         print(f"Warning: Could not initialize database: {e}")
 
+# Lazy load langchain to avoid import errors on Vercel
+_analyze_feedback = None
+
+def get_analyzer():
+    global _analyze_feedback
+    if _analyze_feedback is None:
+        from llm import analyze_feedback
+        _analyze_feedback = analyze_feedback
+    return _analyze_feedback
+
 # Analyze route
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -37,6 +46,7 @@ def analyze():
         return jsonify({'error': 'No feedback text provided'}), 400
     
     print(f" Analyzing feedback: {user_input[:50]}...")
+    analyze_feedback = get_analyzer()
     result = analyze_feedback(user_input)
     print(f"Analysis result: {result}")
     
